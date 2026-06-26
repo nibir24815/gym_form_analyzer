@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react'
-import { Dumbbell, Brain, CalendarDays, Flame, Menu, X, ShieldCheck } from 'lucide-react'
+import { Dumbbell, Brain, CalendarDays, Flame, Menu, X, ShieldCheck, LogOut } from 'lucide-react'
 import Dashboard from './components/Dashboard'
 import FormAnalyzer from './components/FormAnalyzer'
 import WorkoutPlanner from './components/WorkoutPlanner'
+import Auth from './components/Auth'
 import { supabase } from './lib/supabase'
+import { User } from '@supabase/supabase-js'
 
 type Tab = 'dashboard' | 'analyzer' | 'planner'
 
@@ -16,19 +18,37 @@ const tabs: { id: Tab; label: string; description: string; icon: typeof Dumbbell
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('dashboard')
   const [isMobileOpen, setIsMobileOpen] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
   const [dbStatus, setDbStatus] = useState<'checking' | 'connected' | 'error'>('checking')
 
   useEffect(() => {
+    // Fetch initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setAuthLoading(false)
+    })
+
+    // Listen to auth state transitions
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      setAuthLoading(false)
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  useEffect(() => {
     async function checkConnection() {
+      if (!user) return
       try {
         const { error } = await supabase.from('form_analyses').select('id').limit(1)
-        if (error && error.code !== 'PGRST116') { // PGRST116 is empty table, which is fine
-          // Let's check if the error is just an empty table or not.
-          // If we can read from it or if the client didn't crash, we're good.
+        if (error && error.code !== 'PGRST116') {
+          // Check if table is missing or if connection failed
           if (error.message.includes('relation "form_analyses" does not exist')) {
-            console.warn('Table form_analyses does not exist yet. Check migrations.', error)
+            console.warn('Supabase DB connection active, but table "form_analyses" does not exist yet. Please run migrations.', error)
           }
-          setDbStatus('connected') // Client initialized & connected, schema might just be pending
+          setDbStatus('connected')
         } else {
           setDbStatus('connected')
         }
@@ -38,7 +58,27 @@ export default function App() {
       }
     }
     checkConnection()
-  }, [])
+  }, [user])
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    setActiveTab('dashboard')
+  }
+
+  // Display initial loader during session handshake
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gym-bg text-gym-text flex flex-col items-center justify-center gap-4">
+        <div className="w-10 h-10 border-4 border-fire-500/30 border-t-fire-500 rounded-full animate-spin" />
+        <p className="text-xs text-gym-text-dim font-bold uppercase tracking-wider">Establishing secure connection...</p>
+      </div>
+    )
+  }
+
+  // Auth gate if user is not authenticated
+  if (!user) {
+    return <Auth />
+  }
 
   return (
     <div className="min-h-screen bg-gym-bg text-gym-text font-body flex flex-col md:flex-row relative">
@@ -159,6 +199,12 @@ export default function App() {
 
         {/* Sidebar Status Footer */}
         <div className="space-y-3 pt-4 border-t border-gym-border/60">
+          {/* Authenticated user indicator */}
+          <div className="px-1 space-y-0.5">
+            <span className="text-[9px] text-gym-text-dim font-bold uppercase tracking-wider">Signed In As</span>
+            <p className="text-xs text-gym-text font-bold truncate">{user.email}</p>
+          </div>
+
           {/* Cloud Database Integration Badge */}
           <div className="glass-card px-3.5 py-2.5 flex items-center justify-between border border-gym-border bg-gym-bg/40">
             <div className="flex items-center gap-2">
@@ -185,18 +231,22 @@ export default function App() {
             )}
           </div>
 
-          <div className="flex items-center justify-between text-[10px] text-gym-text-dim px-1 font-semibold uppercase tracking-wider">
-            <span>Server: Cloud V1</span>
-            <span>v1.0.0</span>
-          </div>
+          {/* Secure Sign Out Button */}
+          <button
+            onClick={handleSignOut}
+            className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-left text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-transparent transition-all duration-200 cursor-pointer text-xs font-bold"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Secure Sign Out</span>
+          </button>
         </div>
       </aside>
 
       {/* Main View Container */}
       <main className="flex-1 relative z-10 p-4 md:p-8 min-h-[calc(100vh-60px)] md:min-h-screen overflow-y-auto">
         <div key={activeTab} className="tab-enter max-w-6xl mx-auto">
-          {activeTab === 'dashboard' && <Dashboard />}
-          {activeTab === 'analyzer' && <FormAnalyzer />}
+          {activeTab === 'dashboard' && <Dashboard user={user} />}
+          {activeTab === 'analyzer' && <FormAnalyzer user={user} />}
           {activeTab === 'planner' && <WorkoutPlanner />}
         </div>
 
@@ -206,9 +256,9 @@ export default function App() {
             © 2026 GymForge. Precision biomechanics & coaching.
           </p>
           <div className="flex items-center gap-3.5">
-            <span className="text-xs text-gym-text-dim font-bold">DARK PROTOCOL</span>
+            <span className="text-xs text-gym-text-dim font-bold">SECURE PORTAL</span>
             <div className="w-1 h-1 rounded-full bg-gym-text-dim" />
-            <span className="text-xs text-gym-text-dim font-medium">Supabase Powered</span>
+            <span className="text-xs text-gym-text-dim font-medium">VLM Inference Client</span>
           </div>
         </footer>
       </main>

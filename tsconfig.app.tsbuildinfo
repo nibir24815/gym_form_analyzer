@@ -1,1 +1,1 @@
-{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/dashboard.tsx","./src/components/formanalyzer.tsx","./src/components/workoutplanner.tsx","./src/lib/supabase.ts"],"version":"5.8.3"}
+{"root":["./src/app.tsx","./src/main.tsx","./src/vite-env.d.ts","./src/components/auth.tsx","./src/components/dashboard.tsx","./src/components/formanalyzer.tsx","./src/components/workoutplanner.tsx","./src/lib/hfclient.ts","./src/lib/supabase.ts"],"version":"5.8.3"}
