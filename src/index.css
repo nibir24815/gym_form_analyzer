@@ -1,0 +1,158 @@
+@import "tailwindcss";
+
+/* ─── Custom Theme Tokens ─── */
+@theme {
+  --color-gym-bg: #09090b;
+  --color-gym-surface: #0f0f11;
+  --color-gym-surface-alt: #18181b;
+  --color-gym-card: rgba(15, 15, 17, 0.65);
+  --color-gym-border: #27272a;
+  --color-gym-border-glow: rgba(34, 197, 94, 0.3);
+  
+  --color-fire-500: #22c55e;
+  --color-fire-400: #4ade80;
+  --color-fire-300: #86efac;
+  --color-fire-600: #16a34a;
+  --color-fire-700: #15803d;
+  
+  --color-electric-400: #60a5fa;
+  --color-electric-500: #3b82f6;
+  --color-electric-600: #2563eb;
+  
+  --color-neon-green: #22c55e;
+  --color-neon-yellow: #eab308;
+  
+  --color-gym-text: #fafafa;
+  --color-gym-text-muted: #a1a1aa;
+  --color-gym-text-dim: #71717a;
+  
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  
+  --animate-pulse-glow: pulse-glow 2s ease-in-out infinite;
+  --animate-slide-up: slide-up 0.5s ease-out;
+  --animate-fade-in: fade-in 0.4s ease-out;
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-shimmer: shimmer 2s linear infinite;
+}
+
+/* ─── Keyframes ─── */
+@keyframes pulse-glow {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 8px rgba(34, 197, 94, 0.4)); }
+  50% { opacity: 0.7; filter: drop-shadow(0 0 2px rgba(34, 197, 94, 0.1)); }
+}
+
+@keyframes slide-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes bar-grow {
+  from { transform: scaleY(0); }
+  to { transform: scaleY(1); }
+}
+
+/* ─── Base Styles ─── */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background: var(--color-gym-bg);
+  color: var(--color-gym-text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-gym-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gym-border);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-fire-500);
+}
+
+/* ─── Utility Classes ─── */
+.glass-card {
+  background: linear-gradient(135deg, rgba(15, 15, 17, 0.7), rgba(24, 24, 27, 0.4));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--color-gym-border);
+  border-radius: 14px;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.03), 0 4px 20px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+  border-color: var(--color-gym-border-glow);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05), 0 8px 30px rgba(34, 197, 94, 0.06);
+}
+
+.fire-gradient {
+  background: linear-gradient(135deg, var(--color-fire-500), var(--color-fire-400));
+}
+
+.fire-gradient-text {
+  background: linear-gradient(135deg, var(--color-fire-500), var(--color-fire-300));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.electric-gradient-text {
+  background: linear-gradient(135deg, var(--color-electric-400), var(--color-electric-500));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-glow {
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.03), 0 0 30px rgba(34, 197, 94, 0.04);
+}
+
+.drop-zone-active {
+  border-color: var(--color-fire-500) !important;
+  background: rgba(34, 197, 94, 0.04) !important;
+  box-shadow: inset 0 0 40px rgba(34, 197, 94, 0.08);
+}
+
+.bar-animate {
+  animation: bar-grow 0.8s ease-out forwards;
+  transform-origin: bottom;
+}
+
+/* ─── Tab animations ─── */
+.tab-enter {
+  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1), fade-in 0.4s ease-out;
+}
